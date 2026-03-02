@@ -1,4 +1,4 @@
-package model;
+package com.ella.truckingapp.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
