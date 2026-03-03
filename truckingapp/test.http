@@ -1,0 +1,10 @@
+### Create a new user
+GET http://localhost:8080/users
+Authorization: Basic user 326d48d0-7750-4e3a-9d56-e76c8b3c4a29
+Content-Type: application/json
+
+{
+  "username": "ella",
+  "password": "1234",
+  "role": "ADMIN"
+}
