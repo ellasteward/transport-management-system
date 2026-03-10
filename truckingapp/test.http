@@ -8,3 +8,20 @@ Content-Type: application/json
   "password": "1234",
   "role": "ADMIN"
 }
+
+
+
+### Create Driver
+POST http://localhost:8080/drivers
+Content-Type: application/json
+
+{
+  "name": "John Smith",
+  "phone": "0211234567",
+  "licenseNumber": "NZ12345"
+}
+
+###
+
+### Get Drivers
+GET http://localhost:8080/drivers
