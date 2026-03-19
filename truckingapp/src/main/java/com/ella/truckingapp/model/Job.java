@@ -1,6 +1,7 @@
 package com.ella.truckingapp.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Job {
@@ -16,6 +17,7 @@ public class Job {
     private JobStatus status;
 
     @ManyToOne
+    @JsonIgnore
     private Driver driver;
 
     public Job() {}

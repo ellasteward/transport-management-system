@@ -19,8 +19,7 @@ public class SecurityConfig {
                         .requestMatchers("/jobs/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(); // simple login popup
-
+                .httpBasic(org.springframework.security.config.Customizer.withDefaults());
         return http.build();
     }
 }
