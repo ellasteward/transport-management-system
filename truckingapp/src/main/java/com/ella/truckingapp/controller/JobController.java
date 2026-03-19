@@ -2,6 +2,7 @@ package com.ella.truckingapp.controller;
 
 import com.ella.truckingapp.model.*;
 import com.ella.truckingapp.repository.*;
+import com.ella.truckingapp.model.JobStatus;
 
 import org.springframework.web.bind.annotation.*;
 
