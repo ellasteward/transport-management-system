@@ -17,7 +17,7 @@ public class Job {
     private JobStatus status;
 
     @ManyToOne
-    @JsonIgnore
+    @JoinColumn(name = "driver_id")
     private Driver driver;
 
     public Job() {}

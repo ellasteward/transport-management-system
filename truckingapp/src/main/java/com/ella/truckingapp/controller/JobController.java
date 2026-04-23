@@ -27,7 +27,20 @@ public class JobController {
 
     @PostMapping
     public Job createJob(@RequestBody Job job) {
+
+        // SET DEFAULT STATUS
         job.setStatus(JobStatus.PENDING);
+
+        // LINK DRIVER
+        if (job.getDriver() != null && job.getDriver().getId() != null) {
+
+            Driver driver = driverRepository
+                    .findById(job.getDriver().getId())
+                    .orElse(null);
+
+            job.setDriver(driver);
+        }
+
         return jobRepository.save(job);
     }
 
@@ -52,4 +65,9 @@ public class JobController {
         return jobRepository.save(job);
     }
 
+
+    @GetMapping("/driver/{driverId}")
+    public List<Job> getJobsByDriver(@PathVariable Long driverId) {
+        return jobRepository.findByDriverId(driverId);
+    }
 }

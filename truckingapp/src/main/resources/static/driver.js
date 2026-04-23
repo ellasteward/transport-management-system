@@ -5,7 +5,7 @@ async function loadDriverJobs() {
     jobsList.innerHTML = "";
 
     if (!driverId) {
-        jobsList.innerHTML = "<p class='error'>Please enter a driver ID</p>";
+        jobsList.innerHTML = "<p class='error'>Enter driver ID</p>";
         return;
     }
 
@@ -13,7 +13,7 @@ async function loadDriverJobs() {
         const response = await fetch(`/jobs/driver/${driverId}`);
 
         if (!response.ok) {
-            jobsList.innerHTML = "<p class='error'>Could not load driver jobs</p>";
+            jobsList.innerHTML = "<p class='error'>Could not load jobs</p>";
             return;
         }
 
@@ -33,28 +33,29 @@ async function loadDriverJobs() {
                 <p><strong>Pickup:</strong> ${job.pickupLocation}</p>
                 <p><strong>Delivery:</strong> ${job.deliveryLocation}</p>
                 <p><strong>Status:</strong> ${job.status}</p>
-                <button onclick="markCompleted(${job.id}, ${driverId})">Mark Completed</button>
+                <button onclick="markCompleted(${job.id})">Mark Completed</button>
             `;
 
             jobsList.appendChild(jobDiv);
         });
+
     } catch (error) {
         jobsList.innerHTML = "<p class='error'>Error loading jobs</p>";
     }
 }
 
-async function markCompleted(jobId, driverId) {
+async function markCompleted(jobId) {
     try {
         const response = await fetch(`/jobs/${jobId}/status?status=COMPLETED`, {
             method: "PUT"
         });
 
         if (response.ok) {
-            loadDriverJobs(driverId);
+            loadDriverJobs(); // FIXED
         } else {
-            alert("Failed to update job status");
+            alert("Failed to update job");
         }
     } catch (error) {
-        alert("Error updating job status");
+        alert("Error updating job");
     }
 }

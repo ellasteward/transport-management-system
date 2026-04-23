@@ -16,7 +16,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/**").permitAll() // allow creating users
                         .requestMatchers("/drivers/**").hasRole("ADMIN")
-                        .requestMatchers("/jobs/**").authenticated()
+                        .requestMatchers("/jobs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(org.springframework.security.config.Customizer.withDefaults());
