@@ -1,3 +1,36 @@
+function getAuthHeader() {
+    return {
+        "Authorization": "Basic " + btoa("admin:admin123")
+    };
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadDriversDropdown();
+});
+
+async function loadDriversDropdown() {
+    try {
+        const res = await fetch("http://localhost:8080/drivers", {
+            headers: getAuthHeader()
+        });
+
+        const drivers = await res.json();
+
+        const select = document.getElementById("driverId");
+        select.innerHTML = "<option value=''>Select Driver</option>";
+
+        drivers.forEach(d => {
+            const option = document.createElement("option");
+            option.value = d.id;
+            option.textContent = `ID: ${d.id} - ${d.name} (${d.truckType || "No type"})`;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error loading drivers:", error);
+    }
+}
+
 async function loadDriverJobs() {
     const driverId = document.getElementById("driverId").value;
     const jobsList = document.getElementById("driverJobsList");
@@ -5,12 +38,14 @@ async function loadDriverJobs() {
     jobsList.innerHTML = "";
 
     if (!driverId) {
-        jobsList.innerHTML = "<p class='error'>Enter driver ID</p>";
+        jobsList.innerHTML = "<p class='error'>Please select a driver</p>";
         return;
     }
 
     try {
-        const response = await fetch(`/jobs/driver/${driverId}`);
+        const response = await fetch(`http://localhost:8080/jobs/driver/${driverId}`, {
+            headers: getAuthHeader()
+        });
 
         if (!response.ok) {
             jobsList.innerHTML = "<p class='error'>Could not load jobs</p>";
@@ -30,9 +65,19 @@ async function loadDriverJobs() {
 
             jobDiv.innerHTML = `
                 <p><strong>Job ID:</strong> ${job.id}</p>
-                <p><strong>Pickup:</strong> ${job.pickupLocation}</p>
-                <p><strong>Delivery:</strong> ${job.deliveryLocation}</p>
-                <p><strong>Status:</strong> ${job.status}</p>
+                <p><strong>Route:</strong> ${job.pickupLocation} → ${job.deliveryLocation}</p>
+                <p><strong>Date:</strong> ${job.jobDate || "N/A"}</p>
+                <p><strong>Weight:</strong> ${job.weight || "N/A"} kg</p>
+                <p><strong>Truck:</strong> ${job.truckType || "N/A"}</p>
+<p>
+    <strong>Status:</strong>
+    <span class="status-badge ${job.status === "COMPLETED" ? "completed" : "pending"}">
+        ${job.status}
+    </span>
+</p>                <p><strong>Comments:</strong> ${job.comments || "-"}</p>
+
+                <input class="small-input" id="comment-${job.id}" placeholder="Add comment">
+                <button onclick="addComment(${job.id})">Save Comment</button>
                 <button onclick="markCompleted(${job.id})">Mark Completed</button>
             `;
 
@@ -46,16 +91,33 @@ async function loadDriverJobs() {
 
 async function markCompleted(jobId) {
     try {
-        const response = await fetch(`/jobs/${jobId}/status?status=COMPLETED`, {
-            method: "PUT"
+        const response = await fetch(`http://localhost:8080/jobs/${jobId}/status?status=COMPLETED`, {
+            method: "PUT",
+            headers: getAuthHeader()
         });
 
         if (response.ok) {
-            loadDriverJobs(); // FIXED
+            loadDriverJobs();
         } else {
             alert("Failed to update job");
         }
+
     } catch (error) {
         alert("Error updating job");
     }
+}
+
+async function addComment(jobId) {
+    const comment = document.getElementById(`comment-${jobId}`).value;
+
+    await fetch(`http://localhost:8080/jobs/${jobId}/comment`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeader()
+        },
+        body: JSON.stringify({ comment })
+    });
+
+    loadDriverJobs();
 }

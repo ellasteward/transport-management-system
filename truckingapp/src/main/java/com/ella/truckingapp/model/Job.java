@@ -19,6 +19,10 @@ public class Job {
     @ManyToOne
     @JoinColumn(name = "driver_id")
     private Driver driver;
+    private String jobDate;     // simple string (easiest)
+    private String truckType;
+    private Double weight;
+    private String comments;
 
     public Job() {}
 
@@ -47,4 +51,16 @@ public class Job {
     public void setDriver(Driver driver) {
         this.driver = driver;
     }
+
+    public String getJobDate() { return jobDate; }
+    public void setJobDate(String jobDate) { this.jobDate = jobDate; }
+
+    public String getTruckType() { return truckType; }
+    public void setTruckType(String truckType) { this.truckType = truckType; }
+
+    public Double getWeight() { return weight; }
+    public void setWeight(Double weight) { this.weight = weight; }
+
+    public String getComments() { return comments; }
+    public void setComments(String comments) { this.comments = comments; }
 }

@@ -6,18 +6,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div class="container">
 
-    <!-- NAVIGATION -->
-    <div style="display:flex; justify-content:space-between;">
+    <div class="nav">
         <a href="/driver.html">Driver Dashboard</a>
+        <a href="/drivers.html">Manage Drivers</a>
         <a href="/login.html">Logout</a>
+        <a href="/calendar.html">Calendar</a>
     </div>
 
     <h1>Admin Dashboard</h1>
 
     <div class="section">
         <h2>Create Job</h2>
+
         <form id="jobForm" class="form-box">
 
             <label>Pickup Location</label>
@@ -26,13 +29,28 @@
             <label>Delivery Location</label>
             <input type="text" id="deliveryLocation" required>
 
-            <label>Driver ID</label>
-            <input type="number" id="driverId" required>
+            <label>Date</label>
+            <input type="date" id="jobDate">
+
+            <label>Weight (kg)</label>
+            <input type="number" id="weight">
+
+            <label>Truck Type</label>
+            <select id="truckType" onchange="filterDrivers()">
+                <option value="HIAB">HIAB</option>
+                <option value="TRUCK">Truck</option>
+                <option value="TRUCK_TRAILER">Truck & Trailer</option>
+            </select>
+
+            <label>Driver</label>
+            <select id="driverId"></select>
+
+            <label>Comments</label>
+            <input type="text" id="comments">
 
             <button type="submit">Create Job</button>
-        </form>
 
-        <p id="jobMessage"></p>
+        </form>
     </div>
 
     <div class="section">
@@ -41,9 +59,15 @@
         <div id="jobsList"></div>
     </div>
 
+    <div class="section">
+        <label>Select Date</label>
+        <input type="date" id="filterDate">
+        <button onclick="loadJobsByDate()">View Jobs</button>
+    </div>
+
 </div>
 
-<script src="admin.js"></script>
 
+<script src="admin.js"></script>
 </body>
 </html>

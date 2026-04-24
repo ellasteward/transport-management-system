@@ -12,6 +12,7 @@ public class Driver {
     private String name;
     private String phone;
     private String licenseNumber;
+    private String truckType;
 
     public Driver() {}
 
@@ -28,4 +29,8 @@ public class Driver {
     public void setPhone(String phone) { this.phone = phone; }
 
     public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+
+    public String getTruckType() { return truckType; }
+    public void setTruckType(String truckType) { this.truckType = truckType; }
 }
+

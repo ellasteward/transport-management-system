@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drivers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="nav">
+        <a href="/admin.html">Back</a>
+        <a href="/login.html">Logout</a>
+    </div>
+
+    <h1>Driver Management</h1>
+
+    <h3>Create Driver</h3>
+
+    <input id="driverName" placeholder="Name">
+    <input id="driverPhone" placeholder="Phone">
+    <input id="licenseNumber" placeholder="License">
+
+    <select id="driverTruckType">
+        <option value="HIAB">HIAB</option>
+        <option value="TRUCK">Truck</option>
+        <option value="TRUCK_TRAILER">Truck & Trailer</option>
+    </select>
+
+    <button onclick="createDriver()">Create</button>
+
+    <h3>All Drivers</h3>
+    <div id="driverList"></div>
+
+</div>
+
+<script src="drivers.js"></script>
+</body>
+</html>

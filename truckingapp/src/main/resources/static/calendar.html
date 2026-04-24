@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TruckTruck Calendar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="nav">
+        <a href="/admin.html">Admin Dashboard</a>
+        <a href="/login.html">Logout</a>
+    </div>
+
+    <h1> Job Calendar</h1>
+
+    <div class="section">
+        <label>Select Week Starting</label>
+        <input type="date" id="weekStart">
+
+        <button onclick="loadWeekJobs()">Load Week</button>
+    </div>
+
+    <div id="calendarList"></div>
+
+</div>
+
+<script src="calendar.js"></script>
+</body>
+</html>
