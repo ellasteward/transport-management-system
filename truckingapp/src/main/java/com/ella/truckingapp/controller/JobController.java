@@ -7,6 +7,7 @@ import com.ella.truckingapp.model.JobStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/jobs")
@@ -65,6 +66,40 @@ public class JobController {
         return jobRepository.save(job);
     }
 
+    @PutMapping("/{jobId}/comment")
+    public Job updateComment(@PathVariable Long jobId, @RequestBody Map<String, String> body) {
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        String newComment = body.get("comment");
+
+        // Get existing comments
+        String existingComments = job.getComments();
+
+        if (existingComments == null || existingComments.isEmpty()) {
+            job.setComments(newComment);
+        } else {
+            job.setComments(existingComments + " | " + newComment);
+        }
+
+        return jobRepository.save(job);
+    }
+
+    @PutMapping("/{id}")
+    public Job updateJob(@PathVariable Long id, @RequestBody Job updatedJob) {
+
+        Job job = jobRepository.findById(id).orElseThrow();
+
+        job.setPickupLocation(updatedJob.getPickupLocation());
+        job.setDeliveryLocation(updatedJob.getDeliveryLocation());
+        job.setJobDate(updatedJob.getJobDate());
+        job.setWeight(updatedJob.getWeight());
+        job.setTruckType(updatedJob.getTruckType());
+        job.setComments(updatedJob.getComments());
+
+        return jobRepository.save(job);
+    }
 
     @GetMapping("/driver/{driverId}")
     public List<Job> getJobsByDriver(@PathVariable Long driverId) {

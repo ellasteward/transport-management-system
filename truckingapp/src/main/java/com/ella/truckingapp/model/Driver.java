@@ -13,6 +13,8 @@ public class Driver {
     private String phone;
     private String licenseNumber;
     private String truckType;
+    private String username;
+    private String password;
 
     public Driver() {}
 
@@ -32,5 +34,11 @@ public class Driver {
 
     public String getTruckType() { return truckType; }
     public void setTruckType(String truckType) { this.truckType = truckType; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }
 

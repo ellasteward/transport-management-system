@@ -4,6 +4,7 @@ import com.ella.truckingapp.model.Driver;
 import com.ella.truckingapp.model.Job;
 import com.ella.truckingapp.repository.DriverRepository;
 import com.ella.truckingapp.repository.JobRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,15 +45,18 @@ public class DriverController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDriver(@PathVariable Long id) {
+    public ResponseEntity<?> deleteDriver(@PathVariable Long id) {
 
         boolean hasJobs = jobRepository.findAll().stream()
                 .anyMatch(j -> j.getDriver() != null && j.getDriver().getId().equals(id));
 
         if (hasJobs) {
-            throw new RuntimeException("Driver has assigned jobs");
+            return ResponseEntity
+                    .badRequest()
+                    .body("Driver has assigned jobs");
         }
 
         driverRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }

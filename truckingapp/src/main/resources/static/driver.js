@@ -74,9 +74,11 @@ async function loadDriverJobs() {
     <span class="status-badge ${job.status === "COMPLETED" ? "completed" : "pending"}">
         ${job.status}
     </span>
-</p>                <p><strong>Comments:</strong> ${job.comments || "-"}</p>
+</p>
 
-                <input class="small-input" id="comment-${job.id}" placeholder="Add comment">
+<span class="comments"><strong>Comments:</strong> ${job.comments || "-"}</span>
+
+                <textarea class="comment-box" id="comment-${job.id}" placeholder="Add comment"></textarea>
                 <button onclick="addComment(${job.id})">Save Comment</button>
                 <button onclick="markCompleted(${job.id})">Mark Completed</button>
             `;

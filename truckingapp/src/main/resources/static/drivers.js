@@ -1,3 +1,7 @@
+let currentEditDriverId = null;
+let allDrivers = [];
+
+// AUTH
 function getAuthHeader() {
     return {
         "Authorization": "Basic " + btoa("admin:admin123")
@@ -6,76 +10,126 @@ function getAuthHeader() {
 
 // LOAD DRIVERS
 async function loadDrivers() {
-    const list = document.getElementById("driverList");
+    try {
+        const list = document.getElementById("driverList");
 
-    const res = await fetch("http://localhost:8080/drivers", {
-        headers: getAuthHeader()
-    });
+        const res = await fetch("http://localhost:8080/drivers", {
+            headers: getAuthHeader()
+        });
 
-    const drivers = await res.json();
+        allDrivers = await res.json();
 
-    list.innerHTML = "";
+        list.innerHTML = "";
 
-    drivers.forEach(d => {
-        list.innerHTML += `
-            <div class="job-card">
-                <p><strong>ID:</strong> ${d.id}</p>
+        allDrivers.forEach(d => {
+            list.innerHTML += `
+                <div class="job-card">
+                    <div class="info">
+                        <p><strong>ID:</strong> ${d.id}</p>
+                        <p><strong>Name:</strong> ${d.name}</p>
+                        <p><strong>Phone:</strong> ${d.phone}</p>
+                        <p><strong>License:</strong> ${d.licenseNumber}</p>
+                        <p><strong>Truck:</strong> ${d.truckType}</p>
+                    </div>
 
-                <input id="name-${d.id}" value="${d.name}">
-                <input id="phone-${d.id}" value="${d.phone}">
-                <input id="license-${d.id}" value="${d.licenseNumber}">
+                    <div class="actions">
+                        <button onclick="editDriver(${d.id})">Edit</button>
+                        <button onclick="deleteDriver(${d.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
 
-                <select id="truck-${d.id}">
-                    <option ${d.truckType === "HIAB" ? "selected" : ""}>HIAB</option>
-                    <option ${d.truckType === "TRUCK" ? "selected" : ""}>TRUCK</option>
-                    <option ${d.truckType === "TRUCK_TRAILER" ? "selected" : ""}>TRUCK_TRAILER</option>
-                </select>
-
-                <br><br>
-
-                <button onclick="updateDriver(${d.id})">Save</button>
-                <button onclick="deleteDriver(${d.id})">Delete</button>
-            </div>
-        `;
-    });
+    } catch (err) {
+        console.error("Error loading drivers:", err);
+    }
 }
 
-// UPDATE DRIVER
-async function updateDriver(id) {
-    const name = document.getElementById(`name-${id}`).value;
-    const phone = document.getElementById(`phone-${id}`).value;
-    const licenseNumber = document.getElementById(`license-${id}`).value;
-    const truckType = document.getElementById(`truck-${id}`).value;
+// EDIT DRIVER
+function editDriver(id) {
+    currentEditDriverId = id;
 
-    await fetch(`http://localhost:8080/drivers/${id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeader()
-        },
-        body: JSON.stringify({ name, phone, licenseNumber, truckType })
-    });
+    const driver = allDrivers.find(d => d.id === id);
+    if (!driver) return;
 
-    alert("Driver updated!");
-    loadDrivers();
+    document.getElementById("driverName").value = driver.name;
+    document.getElementById("driverPhone").value = driver.phone;
+    document.getElementById("licenseNumber").value = driver.licenseNumber;
+    document.getElementById("driverTruckType").value = driver.truckType;
+    document.getElementById("driverUsername").value = driver.username || "";
+    document.getElementById("driverPassword").value = "";
+
+    document.getElementById("createDriverBtn").innerText = "Update Driver";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// DELETE DRIVER
-async function deleteDriver(id) {
-    if (!confirm("Delete this driver?")) return;
+// CREATE OR UPDATE
+async function createDriver() {
+    const name = document.getElementById("driverName").value;
+    const phone = document.getElementById("driverPhone").value;
+    const licenseNumber = document.getElementById("licenseNumber").value;
+    const truckType = document.getElementById("driverTruckType").value;
+    const username = document.getElementById("driverUsername").value;
+    const password = document.getElementById("driverPassword").value;
 
-    const res = await fetch(`http://localhost:8080/drivers/${id}`, {
-        method: "DELETE",
-        headers: getAuthHeader()
-    });
+    const body = { name, phone, licenseNumber, truckType, username };
 
-    if (!res.ok) {
-        alert("Cannot delete driver (they may have jobs assigned)");
-        return;
+    if (password) body.password = password;
+
+    if (currentEditDriverId) {
+        await fetch(`http://localhost:8080/drivers/${currentEditDriverId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(body)
+        });
+
+        alert("Driver updated!");
+        currentEditDriverId = null;
+        document.getElementById("createDriverBtn").innerText = "Create";
+
+    } else {
+        await fetch("http://localhost:8080/drivers", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(body)
+        });
+
+        alert("Driver created!");
     }
 
     loadDrivers();
 }
 
-// LOAD ON PAGE
+// DELETE
+async function deleteDriver(id) {
+    if (!confirm("Delete this driver?")) return;
+
+    try {
+        const res = await fetch(`http://localhost:8080/drivers/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeader()
+        });
+
+        if (res.ok) {
+            alert("Driver deleted!");
+            loadDrivers();
+        } else {
+            const message = await res.text();
+            alert(" " + message);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting driver");
+    }
+}
+
+// LOAD PAGE
 document.addEventListener("DOMContentLoaded", loadDrivers);

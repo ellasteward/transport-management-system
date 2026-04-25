@@ -19,44 +19,50 @@ async function loadWeekJobs() {
 
     const jobs = await res.json();
 
-    const container = document.getElementById("calendarList");
-    container.innerHTML = "";
+    const tableBody = document.getElementById("calendarBody");
+    tableBody.innerHTML = "";
 
-    // Convert start date to Date object
     const start = new Date(startDate);
 
-    // Loop 7 days (week)
+    // loop 7 days
     for (let i = 0; i < 7; i++) {
         const current = new Date(start);
         current.setDate(start.getDate() + i);
 
         const dateStr = current.toISOString().split("T")[0];
 
-        // Filter jobs for this date
         const dayJobs = jobs.filter(j => j.jobDate === dateStr);
 
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "calendar-day";
-
-        dayDiv.innerHTML = `
-            <h3>${dateStr}</h3>
+        // DATE HEADER ROW (only once per day)
+        const dateRow = document.createElement("tr");
+        dateRow.innerHTML = `
+            <td colspan="5" style="font-weight:bold; background:#eef2f7;">
+                ${dateStr}
+            </td>
         `;
+        tableBody.appendChild(dateRow);
 
         if (dayJobs.length === 0) {
-            dayDiv.innerHTML += `<p class="no-jobs">No jobs</p>`;
+            const emptyRow = document.createElement("tr");
+            emptyRow.innerHTML = `
+                <td></td>
+                <td colspan="4" style="color:#999;">No jobs</td>
+            `;
+            tableBody.appendChild(emptyRow);
         } else {
             dayJobs.forEach(job => {
-                dayDiv.innerHTML += `
-                    <div class="job-card">
-                        <p><strong>${job.pickupLocation} → ${job.deliveryLocation}</strong></p>
-                        <p>Driver: ${job.driver ? job.driver.name : "None"}</p>
-                        <p>Truck: ${job.truckType || "N/A"}</p>
-                        <p>Weight: ${job.weight || "N/A"} kg</p>
-                    </div>
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td></td>
+                    <td>${job.pickupLocation} → ${job.deliveryLocation}</td>
+                    <td>${job.driver ? job.driver.name : "None"}</td>
+                    <td>${job.truckType || "N/A"}</td>
+                    <td>${job.weight || "N/A"} kg</td>
                 `;
+
+                tableBody.appendChild(row);
             });
         }
-
-        container.appendChild(dayDiv);
     }
 }

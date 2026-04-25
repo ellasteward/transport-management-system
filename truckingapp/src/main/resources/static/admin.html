@@ -56,7 +56,22 @@
     <div class="section">
         <h2>All Jobs</h2>
         <button onclick="loadJobs()">Load Jobs</button>
-        <div id="jobsList"></div>
+        <table id="jobTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Route</th>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Truck</th>
+                <th>Driver</th>
+                <th>Status</th>
+                <th>Comments</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="jobTableBody"></tbody>
+        </table>
     </div>
 
     <div class="section">

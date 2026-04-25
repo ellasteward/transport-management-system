@@ -23,8 +23,18 @@
         <button onclick="loadWeekJobs()">Load Week</button>
     </div>
 
-    <div id="calendarList"></div>
-
+    <table id="calendarTable">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Route</th>
+            <th>Driver</th>
+            <th>Truck</th>
+            <th>Weight</th>
+        </tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+    </table>
 </div>
 
 <script src="calendar.js"></script>

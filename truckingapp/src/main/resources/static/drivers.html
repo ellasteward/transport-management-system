@@ -20,6 +20,8 @@
     <input id="driverName" placeholder="Name">
     <input id="driverPhone" placeholder="Phone">
     <input id="licenseNumber" placeholder="License">
+    <input id="driverUsername" placeholder="Username">
+    <input id="driverPassword" placeholder="Password">
 
     <select id="driverTruckType">
         <option value="HIAB">HIAB</option>
@@ -27,8 +29,9 @@
         <option value="TRUCK_TRAILER">Truck & Trailer</option>
     </select>
 
-    <button onclick="createDriver()">Create</button>
 
+
+    <button id="createDriverBtn" onclick="createDriver()">Create</button>
     <h3>All Drivers</h3>
     <div id="driverList"></div>
 

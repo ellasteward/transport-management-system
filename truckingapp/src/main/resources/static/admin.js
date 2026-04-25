@@ -44,32 +44,47 @@ function filterDrivers() {
 document.getElementById("jobForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const pickupLocation = document.getElementById("pickupLocation").value;
-    const deliveryLocation = document.getElementById("deliveryLocation").value;
-    const jobDate = document.getElementById("jobDate").value;
-    const weight = document.getElementById("weight").value;
-    const truckType = document.getElementById("truckType").value;
-    const comments = document.getElementById("comments").value;
-    const driverId = document.getElementById("driverId").value;
+    const jobId = localStorage.getItem("editJobId");
 
-    try {
+    const jobData = {
+        pickupLocation: document.getElementById("pickupLocation").value,
+        deliveryLocation: document.getElementById("deliveryLocation").value,
+        jobDate: document.getElementById("jobDate").value,
+        weight: document.getElementById("weight").value,
+        truckType: document.getElementById("truckType").value,
+        comments: document.getElementById("comments").value
+    };
+
+    if (jobId) {
+        // UPDATE EXISTING JOB
+        await fetch(`http://localhost:8080/jobs/${jobId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(jobData)
+        });
+
+        localStorage.removeItem("editJobId");
+
+        alert("Job updated!");
+        document.querySelector("#jobForm button").innerText = "Create Job";
+
+    } else {
+        // CREATE NEW JOB
         const res = await fetch("http://localhost:8080/jobs", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 ...getAuthHeader()
             },
-            body: JSON.stringify({
-                pickupLocation,
-                deliveryLocation,
-                jobDate,
-                weight,
-                truckType,
-                comments
-            })
+            body: JSON.stringify(jobData)
         });
 
         const job = await res.json();
+
+        const driverId = document.getElementById("driverId").value;
 
         await fetch(`http://localhost:8080/jobs/${job.id}/assign/${driverId}`, {
             method: "PUT",
@@ -77,37 +92,47 @@ document.getElementById("jobForm").addEventListener("submit", async function (e)
         });
 
         alert("Job created!");
-        loadJobs();
-
-    } catch (err) {
-        alert("Error creating job");
     }
+
+    loadJobs();
 });
 
 // LOAD JOBS
 async function loadJobs() {
-    const list = document.getElementById("jobsList");
-
     const res = await fetch("http://localhost:8080/jobs", {
         headers: getAuthHeader()
     });
 
     const jobs = await res.json();
 
-    list.innerHTML = "";
+    const tableBody = document.getElementById("jobTableBody");
+    tableBody.innerHTML = "";
 
-    jobs.forEach(j => {
-        list.innerHTML += `
-            <div class="job-card">
-                <p><strong>ID:</strong> ${j.id}</p>
-                <p>${j.pickupLocation} → ${j.deliveryLocation}</p>
-                <p>Date: ${j.jobDate || "N/A"}</p>
-                <p>Weight: ${j.weight || "N/A"} kg</p>
-                <p>Truck: ${j.truckType || "N/A"}</p>
-                <p>Driver: ${j.driver ? j.driver.name : "None"}</p>
-                <p>Comments: ${j.comments || "-"}</p>
-            </div>
+    jobs.forEach(job => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${job.id}</td>
+            <td>${job.pickupLocation} → ${job.deliveryLocation}</td>
+            <td>${job.jobDate || "N/A"}</td>
+            <td>${job.weight || "N/A"} kg</td>
+            <td>${job.truckType || "N/A"}</td>
+            <td>${job.driver ? job.driver.id : "None"}</td>
+            <td>
+                <span class="${job.status === "COMPLETED" ? "completed" : "pending"}">
+                    ${job.status}
+                </span>
+            </td>
+            <td>${job.comments || "-"}</td>
+            <td>
+                <input id="comment-${job.id}" placeholder="Add comment">
+                <button onclick="addComment(${job.id})">Save</button>
+                <button onclick="markCompleted(${job.id})">✔</button>
+                <button onclick="editJob(${job.id})">Edit</button>
+            </td>
         `;
+
+        tableBody.appendChild(row);
     });
 }
 
@@ -135,3 +160,61 @@ async function loadJobsByDate() {
     });
 }
 
+
+async function addComment(jobId) {
+    const comment = document.getElementById(`comment-${jobId}`).value;
+
+    console.log("Adding comment:", comment);
+
+    await fetch(`http://localhost:8080/jobs/${jobId}/comment`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeader()
+        },
+        body: JSON.stringify({ comment })
+    });
+
+    loadJobs();
+}
+
+
+async function markCompleted(jobId) {
+    console.log("Marking complete:", jobId);
+
+    await fetch(`http://localhost:8080/jobs/${jobId}/status?status=COMPLETED`, {
+        method: "PUT",
+        headers: getAuthHeader()
+    });
+
+    loadJobs();
+}
+
+function editJob(jobId) {
+    console.log("Editing job:", jobId);
+
+    localStorage.setItem("editJobId", jobId);
+
+    // scroll user up to form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    loadJobIntoForm(jobId);
+}
+
+async function loadJobIntoForm(jobId) {
+    const res = await fetch("http://localhost:8080/jobs", {
+        headers: getAuthHeader()
+    });
+
+    const jobs = await res.json();
+    const job = jobs.find(j => j.id == jobId);
+
+    if (!job) return;
+
+    document.getElementById("pickupLocation").value = job.pickupLocation;
+    document.getElementById("deliveryLocation").value = job.deliveryLocation;
+    document.getElementById("jobDate").value = job.jobDate || "";
+    document.getElementById("weight").value = job.weight || "";
+    document.getElementById("truckType").value = job.truckType || "";
+    document.getElementById("comments").value = job.comments || "";
+}
