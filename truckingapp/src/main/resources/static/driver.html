@@ -6,32 +6,40 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div class="container">
 
-  <!-- NAVIGATION -->
-  <div style="display:flex; justify-content:space-between;">
-    <a href="/admin.html">Admin Dashboard</a>
-    <a href="/login.html">Logout</a>
-  </div>
-
-  <h1>Driver Dashboard</h1>
-
-  <div class="section">
-    <h2>View My Jobs</h2>
-
-    <div class="form-box">
-      <label>Select Driver</label>
-      <select id="driverId"></select>
-
-      <button onclick="loadDriverJobs()">Load My Jobs</button>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h2 id="driverName"></h2>
+      <h1>Driver Dashboard</h1>
     </div>
+
+    <button onclick="logout()">Logout</button>
   </div>
 
+  <!-- FILTERS -->
+  <div class="section">
+    <h2>Filter</h2>
+
+    <input type="date" id="weekStart">
+
+    <select id="statusFilter">
+      <option value="">All Status</option>
+      <option value="PENDING">Pending</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="COMPLETED">Completed</option>
+    </select>
+
+    <button onclick="loadMyJobsByWeek()">Load Week</button>
+  </div>
+
+  <!-- JOBS -->
   <div class="section">
     <h2>My Jobs</h2>
     <div id="driverJobsList"></div>
   </div>
-
 
 </div>
 

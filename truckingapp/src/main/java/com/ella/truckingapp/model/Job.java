@@ -13,6 +13,7 @@ public class Job {
     private String pickupLocation;
     private String deliveryLocation;
 
+
     @Enumerated(EnumType.STRING)
     private JobStatus status;
 

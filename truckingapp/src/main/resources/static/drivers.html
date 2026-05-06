@@ -13,26 +13,51 @@
         <a href="/login.html">Logout</a>
     </div>
 
-    <h1>Driver Management</h1>
+    <h1>Driver / Dispatcher Management</h1>
 
-    <h3>Create Driver</h3>
+    <div class="driver-form">
 
-    <input id="driverName" placeholder="Name">
-    <input id="driverPhone" placeholder="Phone">
-    <input id="licenseNumber" placeholder="License">
-    <input id="driverUsername" placeholder="Username">
-    <input id="driverPassword" placeholder="Password">
+        <div class="form-group">
+            <input id="driverName" placeholder="Name">
+        </div>
 
-    <select id="driverTruckType">
-        <option value="HIAB">HIAB</option>
-        <option value="TRUCK">Truck</option>
-        <option value="TRUCK_TRAILER">Truck & Trailer</option>
-    </select>
+        <div class="form-group">
+            <input id="driverPhone" placeholder="Phone">
+        </div>
 
+        <div class="form-group">
+            <input id="licenseNumber" placeholder="License">
+        </div>
 
+        <div class="form-group">
+            <input id="driverUsername" placeholder="Username">
+        </div>
 
-    <button id="createDriverBtn" onclick="createDriver()">Create</button>
-    <h3>All Drivers</h3>
+        <div class="form-group">
+            <input id="driverPassword" placeholder="Password">
+        </div>
+
+        <div class="form-group">
+            <select id="userRole">
+                <option value="DRIVER">Driver</option>
+                <option value="DISPATCHER">Dispatcher</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="truckTypeSection">
+            <select id="driverTruckType">
+                <option value="HIAB">HIAB</option>
+                <option value="TRUCK">TRUCK</option>
+                <option value="TRUCK_TRAILER">Truck & Trailer</option>
+            </select>
+        </div>
+
+        <button id="createDriverBtn" onclick="createDriver()">
+            Create
+        </button>
+
+    </div>
+    <h3 class="driver-section-title">All Drivers</h3>
     <div id="driverList"></div>
 
 </div>

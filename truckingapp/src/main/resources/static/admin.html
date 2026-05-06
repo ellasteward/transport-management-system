@@ -10,10 +10,18 @@
 <div class="container">
 
     <div class="nav">
-        <a href="/driver.html">Driver Dashboard</a>
-        <a href="/drivers.html">Manage Drivers</a>
-        <a href="/login.html">Logout</a>
-        <a href="/calendar.html">Calendar</a>
+
+        <div class="nav-left">
+            <a href="/drivers.html" id="manageDriversLink">
+                Manage Drivers
+            </a>
+            <a href="/calendar.html">Calendar</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="/login.html">Logout</a>
+        </div>
+
     </div>
 
     <h1>Admin Dashboard</h1>
@@ -21,67 +29,138 @@
     <div class="section">
         <h2>Create Job</h2>
 
-        <form id="jobForm" class="form-box">
+        <div class="create-job-form">
 
-            <label>Pickup Location</label>
-            <input type="text" id="pickupLocation" required>
+            <div class="create-job-row">
+                <div>
+                    <label>Pickup Location</label><br>
+                    <input type="text" id="pickupLocation">
+                </div>
 
-            <label>Delivery Location</label>
-            <input type="text" id="deliveryLocation" required>
+                <div>
+                    <label>Delivery Location</label><br>
+                    <input type="text" id="deliveryLocation">
+                </div>
+            </div>
 
-            <label>Date</label>
-            <input type="date" id="jobDate">
+            <div class="create-job-row">
+                <div>
+                    <label>Date</label><br>
+                    <input type="date" id="jobDate">
+                </div>
 
-            <label>Weight (kg)</label>
-            <input type="number" id="weight">
+                <div>
+                    <label>Weight (kg)</label><br>
+                    <input type="number" id="weight">
+                </div>
+            </div>
 
-            <label>Truck Type</label>
-            <select id="truckType" onchange="filterDrivers()">
-                <option value="HIAB">HIAB</option>
-                <option value="TRUCK">Truck</option>
-                <option value="TRUCK_TRAILER">Truck & Trailer</option>
-            </select>
+            <div class="create-job-row">
+                <div>
+                    <label>Truck Type</label><br>
+                    <select id="truckType">
+                        <option value="TRUCK">TRUCK</option>
+                        <option value="HIAB">HIAB</option>
+                        <option value="TRUCK_TRAILER">TRUCK_TRAILER</option>
+                    </select>
+                </div>
 
-            <label>Driver</label>
-            <select id="driverId"></select>
+                <div>
+                    <label>Driver</label><br>
+                    <select id="driverId"></select>
+                </div>
+            </div>
 
-            <label>Comments</label>
-            <input type="text" id="comments">
+            <div class="create-job-row">
+                <div style="width:100%;">
+                    <label>Comments</label><br>
+                    <input type="text" id="comments" style="width:100%;">
+                </div>
+            </div>
 
-            <button type="submit">Create Job</button>
+            <button onclick="createJob()">Create Job</button>
 
-        </form>
-    </div>
+        </div>
 
-    <div class="section">
-        <h2>All Jobs</h2>
-        <button onclick="loadJobs()">Load Jobs</button>
-        <table id="jobTable">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Route</th>
-                <th>Date</th>
-                <th>Weight</th>
-                <th>Truck</th>
-                <th>Driver</th>
-                <th>Status</th>
-                <th>Comments</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody id="jobTableBody"></tbody>
-        </table>
-    </div>
+        <div class="section">
 
-    <div class="section">
-        <label>Select Date</label>
-        <input type="date" id="filterDate">
-        <button onclick="loadJobsByDate()">View Jobs</button>
-    </div>
+            <h2>All Jobs</h2>
+
+            <div class="job-filters">
+
+                <div>
+                    <label>Select Date</label><br>
+                    <input type="date" id="filterDate">
+                </div>
+
+                <div>
+                    <label>Driver</label><br>
+                    <select id="filterDriver">
+                        <option value="">All Drivers</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Status</label><br>
+                    <select id="filterStatus">
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                </div>
+
+                <div class="filter-buttons">
+                    <button onclick="loadFilteredJobs()">Filter Jobs</button>
+                    <button class="btn-secondary" onclick="loadJobs()">
+                        Load All Jobs
+                    </button>
+                </div>
+
+            </div>
+
+            <table id="jobTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Route</th>
+                    <th>Date</th>
+                    <th>Weight</th>
+                    <th>Truck</th>
+                    <th>Driver</th>
+                    <th>Status</th>
+                    <th>Comments</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody id="jobTableBody"></tbody>
+
+            </table>
+
+        </div>
+
 
 </div>
+    <script>
 
+        const username =
+            localStorage.getItem("username");
+
+        if (
+            username &&
+            username.toLowerCase().includes("dispatch")
+        ) {
+
+            const link =
+                document.getElementById("manageDriversLink");
+
+            if (link) {
+                link.style.display = "none";
+            }
+        }
+
+    </script>
 
 <script src="admin.js"></script>
 </body>

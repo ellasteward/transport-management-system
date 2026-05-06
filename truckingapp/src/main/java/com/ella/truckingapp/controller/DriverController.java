@@ -2,8 +2,11 @@ package com.ella.truckingapp.controller;
 
 import com.ella.truckingapp.model.Driver;
 import com.ella.truckingapp.model.Job;
+import com.ella.truckingapp.model.User;
 import com.ella.truckingapp.repository.DriverRepository;
 import com.ella.truckingapp.repository.JobRepository;
+import com.ella.truckingapp.repository.UserRepository;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +18,15 @@ public class DriverController {
 
     private final DriverRepository driverRepository;
     private final JobRepository jobRepository;
+    private final UserRepository userRepository;
 
-    public DriverController(DriverRepository driverRepository, JobRepository jobRepository) {
+    // ✅ ONE constructor only
+    public DriverController(DriverRepository driverRepository,
+                            JobRepository jobRepository,
+                            UserRepository userRepository) {
         this.driverRepository = driverRepository;
         this.jobRepository = jobRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -28,7 +36,18 @@ public class DriverController {
 
     @PostMapping
     public Driver createDriver(@RequestBody Driver driver) {
-        return driverRepository.save(driver);
+
+        // Save driver
+        Driver savedDriver = driverRepository.save(driver);
+
+        // Create login user
+        User user = new User();
+        user.setUsername(driver.getUsername());
+        user.setPassword(driver.getPassword());
+        user.setRole(driver.getRole());
+        userRepository.save(user);
+
+        return savedDriver;
     }
 
     @PutMapping("/{id}")
@@ -59,4 +78,8 @@ public class DriverController {
         driverRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+
+
+
 }

@@ -101,6 +101,11 @@ public class JobController {
         return jobRepository.save(job);
     }
 
+    @GetMapping("/{id}")
+    public Job getJobById(@PathVariable Long id) {
+        return jobRepository.findById(id).orElse(null);
+    }
+
     @GetMapping("/driver/{driverId}")
     public List<Job> getJobsByDriver(@PathVariable Long driverId) {
         return jobRepository.findByDriverId(driverId);

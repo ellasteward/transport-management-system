@@ -6,44 +6,108 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-    <h1>TruckTruck</h1>
-    <h2>Login</h2>
 
-    <div class="form-box">
+<!--
+    Simple login page for TruckTruck.
+    I kept the design lightweight and easy to use so
+    drivers and dispatchers can log in quickly while working.
+-->
 
-        <label>Username</label>
-        <input type="text" id="username" required>
+<div class="login-container">
 
-        <label>Password</label>
-        <input type="password" id="password" required>
+    <div class="login-card">
+        <h1>TruckTruck</h1>
+        <p class="subtitle">Transport Management System</p>
 
-        <button onclick="login()">Login</button>
+        <form id="loginForm">
 
+            <!-- Username input -->
+            <input
+                    type="text"
+                    id="username"
+                    placeholder="Username"
+                    required
+            >
+
+            <!-- Password input -->
+            <input
+                    type="password"
+                    id="password"
+                    placeholder="Password"
+                    required
+            >
+
+            <!-- Login button -->
+            <button type="submit">Login</button>
+
+        </form>
+
+        <!-- Error message if login fails -->
+        <p id="error" class="error"></p>
     </div>
 
-    <p class="note">
-        Admin → <a href="/admin.html">Go to Admin Dashboard</a><br>
-        Driver → <a href="/driver.html">Go to Driver Dashboard</a>
-    </p>
 </div>
-</body>
-</html>
 
 <script>
-    function login() {
+
+    /* Handle login form submission */
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+
+        e.preventDefault();
+
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
-        // store auth
-        const auth = btoa(username + ":" + password);
-        localStorage.setItem("auth", auth);
+        /* Create HTTP Basic Authentication header */
+        const authHeader = "Basic " + btoa(username + ":" + password);
 
-        // VERY SIMPLE role check
-        if (username === "admin") {
-            window.location.href = "/admin.html";
-        } else {
-            window.location.href = "/driver.html";
+        try {
+
+            /* Check login details against backend */
+            const res = await fetch("http://localhost:8080/jobs", {
+                headers: {
+                    "Authorization": authHeader
+                }
+            });
+
+            if (res.ok) {
+
+                /*
+                    Store login token locally so users stay logged in
+                    while using the system
+                */
+                localStorage.setItem("auth", authHeader);
+                localStorage.setItem("username", username);
+
+                /*
+                    Dispatchers and admins go to the admin dashboard
+                    while drivers go to the driver dashboard
+                */
+                if (
+                    username === "admin" ||
+                    username.toLowerCase().includes("dispatch")
+                ) {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "driver.html";
+                }
+
+            } else {
+
+                /* Invalid login */
+                document.getElementById("error").innerText =
+                    "Invalid username or password";
+            }
+
+        } catch (err) {
+
+            /* Backend server offline */
+            document.getElementById("error").innerText =
+                "Server not running";
         }
-    }
+    });
+
 </script>
+
+</body>
+</html>

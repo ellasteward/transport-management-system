@@ -10,6 +10,11 @@ let allDrivers = [];
 document.addEventListener("DOMContentLoaded", () => {
     loadDrivers();
     loadJobs();
+    loadDriverFilters();
+
+    document
+        .getElementById("truckType")
+        .addEventListener("change", filterDriversByTruck);
 });
 
 // LOAD DRIVERS
@@ -38,6 +43,8 @@ function filterDrivers() {
             select.appendChild(option);
         }
     });
+
+    filterDriversByTruck();
 }
 
 // CREATE JOB
@@ -99,41 +106,14 @@ document.getElementById("jobForm").addEventListener("submit", async function (e)
 
 // LOAD JOBS
 async function loadJobs() {
+
     const res = await fetch("http://localhost:8080/jobs", {
         headers: getAuthHeader()
     });
 
     const jobs = await res.json();
 
-    const tableBody = document.getElementById("jobTableBody");
-    tableBody.innerHTML = "";
-
-    jobs.forEach(job => {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${job.id}</td>
-            <td>${job.pickupLocation} → ${job.deliveryLocation}</td>
-            <td>${job.jobDate || "N/A"}</td>
-            <td>${job.weight || "N/A"} kg</td>
-            <td>${job.truckType || "N/A"}</td>
-            <td>${job.driver ? job.driver.id : "None"}</td>
-            <td>
-                <span class="${job.status === "COMPLETED" ? "completed" : "pending"}">
-                    ${job.status}
-                </span>
-            </td>
-            <td>${job.comments || "-"}</td>
-            <td>
-                <input id="comment-${job.id}" placeholder="Add comment">
-                <button onclick="addComment(${job.id})">Save</button>
-                <button onclick="markCompleted(${job.id})">✔</button>
-                <button onclick="editJob(${job.id})">Edit</button>
-            </td>
-        `;
-
-        tableBody.appendChild(row);
-    });
+    renderJobs(jobs);
 }
 
 // FILTER BY DATE
@@ -217,4 +197,173 @@ async function loadJobIntoForm(jobId) {
     document.getElementById("weight").value = job.weight || "";
     document.getElementById("truckType").value = job.truckType || "";
     document.getElementById("comments").value = job.comments || "";
+}
+
+async function loadFilteredJobs() {
+
+    const date = document.getElementById("filterDate").value;
+    const driverId = document.getElementById("filterDriver").value;
+    const status = document.getElementById("filterStatus").value;
+
+    const res = await fetch("http://localhost:8080/jobs", {
+        headers: getAuthHeader()
+    });
+
+    let jobs = await res.json();
+
+    // FILTER DATE
+    if (date) {
+        jobs = jobs.filter(j => j.jobDate === date);
+    }
+
+    // FILTER DRIVER
+    if (driverId) {
+        jobs = jobs.filter(j =>
+            j.driver && j.driver.id == driverId
+        );
+    }
+
+    // FILTER STATUS
+    if (status) {
+        jobs = jobs.filter(j => j.status === status);
+    }
+
+    renderJobs(jobs);
+}
+
+async function loadDriverFilterDropdown() {
+
+    const res = await fetch("http://localhost:8080/drivers", {
+        headers: getAuthHeader()
+    });
+
+    const drivers = await res.json();
+
+    const dropdown = document.getElementById("filterDriver");
+
+    dropdown.innerHTML =
+        `<option value="">All Drivers</option>`;
+
+    drivers.forEach(driver => {
+
+        dropdown.innerHTML += `
+            <option value="${driver.id}">
+                ${driver.name}
+            </option>
+        `;
+    });
+}
+
+function renderJobs(jobs) {
+
+    const tableBody = document.getElementById("jobTableBody");
+    tableBody.innerHTML = "";
+
+    jobs.forEach(job => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${job.id}</td>
+
+            <td>
+                ${job.pickupLocation} → ${job.deliveryLocation}
+            </td>
+
+            <td>${job.jobDate || "N/A"}</td>
+
+            <td>${job.weight || "N/A"} kg</td>
+
+            <td>${job.truckType || "N/A"}</td>
+
+            <td>
+                ${job.driver ? job.driver.name : "None"}
+            </td>
+
+            <td>
+                <span class="
+                    ${job.status === "COMPLETED"
+                        ? "status-completed"
+                        : job.status === "IN_PROGRESS"
+                        ? "status-progress"
+                        : "status-pending"}
+                ">
+                    ${job.status}
+                </span>
+            </td>
+
+            <td>${job.comments || "-"}</td>
+
+            <td>
+
+                <div class="job-buttons">
+
+                    <button onclick="viewJob(${job.id})">
+                        View Job
+                    </button>
+
+                    <button onclick="markCompleted(${job.id})">
+                        Mark Complete
+                    </button>
+
+                </div>
+
+            </td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+}
+
+function filterDriversByTruck() {
+
+    const selectedTruck =
+        document.getElementById("truckType").value;
+
+    const driverSelect =
+        document.getElementById("driverId");
+
+    driverSelect.innerHTML =
+        "<option value=''>Select Driver</option>";
+
+    const filteredDrivers = allDrivers.filter(driver =>
+        driver.truckType === selectedTruck
+    );
+
+    filteredDrivers.forEach(driver => {
+
+        driverSelect.innerHTML += `
+            <option value="${driver.id}">
+                ${driver.name} (${driver.truckType})
+            </option>
+        `;
+    });
+}
+
+async function loadDriverFilters() {
+
+    const res = await fetch("http://localhost:8080/drivers", {
+        headers: getAuthHeader()
+    });
+
+    const drivers = await res.json();
+
+    const filterDropdown =
+        document.getElementById("filterDriver");
+
+    filterDropdown.innerHTML =
+        `<option value="">All Drivers</option>`;
+
+    drivers.forEach(driver => {
+
+        filterDropdown.innerHTML += `
+            <option value="${driver.id}">
+                ${driver.name}
+            </option>
+        `;
+    });
+}
+function viewJob(jobId) {
+    window.location.href =
+        `/job.html?id=${jobId}&mode=admin`;
 }

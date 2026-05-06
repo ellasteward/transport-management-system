@@ -4,7 +4,7 @@ let allDrivers = [];
 // AUTH
 function getAuthHeader() {
     return {
-        "Authorization": "Basic " + btoa("admin:admin123")
+        "Authorization": localStorage.getItem("auth")
     };
 }
 
@@ -72,9 +72,16 @@ async function createDriver() {
     const truckType = document.getElementById("driverTruckType").value;
     const username = document.getElementById("driverUsername").value;
     const password = document.getElementById("driverPassword").value;
+    const role = document.getElementById("userRole").value;
 
-    const body = { name, phone, licenseNumber, truckType, username };
-
+const body = {
+    name,
+    phone,
+    licenseNumber,
+    truckType,
+    username,
+    role
+};
     if (password) body.password = password;
 
     if (currentEditDriverId) {
@@ -133,3 +140,21 @@ async function deleteDriver(id) {
 
 // LOAD PAGE
 document.addEventListener("DOMContentLoaded", loadDrivers);
+
+// ROLE CHANGE
+document.getElementById("userRole").addEventListener("change", function () {
+
+    const role = this.value;
+
+    const truckSection =
+        document.getElementById("truckTypeSection");
+
+    if (role === "DISPATCHER") {
+
+        truckSection.style.display = "none";
+
+    } else {
+
+        truckSection.style.display = "block";
+    }
+});

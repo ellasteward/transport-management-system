@@ -1,105 +1,224 @@
+// AUTH HEADER
 function getAuthHeader() {
     return {
-        "Authorization": "Basic " + btoa("admin:admin123")
+        "Authorization": localStorage.getItem("auth")
     };
 }
 
+// PAGE LOAD
 document.addEventListener("DOMContentLoaded", () => {
-    loadDriversDropdown();
+    hideAdminLink();
+    setDriverName();
+    loadMyJobs();
 });
 
-async function loadDriversDropdown() {
+// Hide admin link for drivers
+function hideAdminLink() {
+    const username = localStorage.getItem("username");
+
+    if (username !== "admin") {
+        const adminLink = document.getElementById("adminLink");
+        if (adminLink) adminLink.style.display = "none";
+    }
+}
+
+function renderJobs(jobs) {
+    const jobsList = document.getElementById("driverJobsList");
+    jobsList.innerHTML = "";
+
+    if (jobs.length === 0) {
+        jobsList.innerHTML = "<p>No jobs found</p>";
+        return;
+    }
+
+    // 🔹 Sort jobs by date
+    jobs.sort((a, b) => new Date(a.jobDate) - new Date(b.jobDate));
+
+    let currentDate = "";
+
+    jobs.forEach(job => {
+
+        // DATE HEADER
+        if (job.jobDate !== currentDate) {
+            currentDate = job.jobDate;
+
+            const dateObj = new Date(currentDate);
+
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            };
+
+            const dateHeader = document.createElement("h3");
+            dateHeader.style.marginTop = "20px";
+            dateHeader.style.color = "#2c3e50";
+
+            dateHeader.innerText =
+                dateObj.toLocaleDateString('en-NZ', options);
+
+            jobsList.appendChild(dateHeader);
+        }
+
+        // FIXED VARIABLES
+        const formattedDate = new Date(job.jobDate)
+            .toLocaleDateString('en-NZ');
+
+        const status = job.status || "PENDING";
+
+        const statusText =
+            status.replace("_", " ");
+
+        const statusClass =
+            status === "COMPLETED"
+                ? "completed"
+                : status === "IN_PROGRESS"
+                    ? "in-progress"
+                    : "pending";
+
+        // JOB CARD
+        const jobDiv = document.createElement("div");
+        jobDiv.className = "job-card";
+
+        jobDiv.innerHTML = `
+            <div class="job-top-row">
+                <span><strong>Job ID:</strong> ${job.id}</span>
+
+                <span>
+                    <strong>Route:</strong>
+                    ${job.pickupLocation} → ${job.deliveryLocation}
+                </span>
+
+                <span><strong>Date:</strong> ${formattedDate}</span>
+
+                <span>
+                    <strong>Weight:</strong>
+                    ${job.weight || "N/A"} kg
+                </span>
+
+                <span>
+                    <strong>Truck:</strong>
+                    ${job.truckType || "N/A"}
+                </span>
+
+                <span>
+                    <strong>Status:</strong>
+
+                    <span class="status-badge ${statusClass}">
+                        ${statusText}
+                    </span>
+                </span>
+            </div>
+
+            <div class="job-buttons">
+                <button onclick="viewJob(${job.id})">
+                    View Job
+                </button>
+
+                <button onclick="markCompleted(${job.id})">
+                    Mark Completed
+                </button>
+            </div>
+        `;
+
+        jobsList.appendChild(jobDiv);
+    });
+}
+
+//Load ALL jobs (default view)
+async function loadMyJobs() {
     try {
+        const username = localStorage.getItem("username");
+
         const res = await fetch("http://localhost:8080/drivers", {
             headers: getAuthHeader()
         });
 
         const drivers = await res.json();
+        const driver = drivers.find(d => d.username === username);
 
-        const select = document.getElementById("driverId");
-        select.innerHTML = "<option value=''>Select Driver</option>";
+        if (!driver) {
+            document.getElementById("driverJobsList").innerHTML = "<p>Driver not found</p>";
+            return;
+        }
 
-        drivers.forEach(d => {
-            const option = document.createElement("option");
-            option.value = d.id;
-            option.textContent = `ID: ${d.id} - ${d.name} (${d.truckType || "No type"})`;
-            select.appendChild(option);
+        const response = await fetch(`http://localhost:8080/jobs/driver/${driver.id}`, {
+            headers: getAuthHeader()
         });
 
+        const jobs = await response.json();
+
+        renderJobs(jobs); //uses shared UI
+
     } catch (error) {
-        console.error("Error loading drivers:", error);
+        console.error(error);
     }
 }
 
-async function loadDriverJobs() {
-    const driverId = document.getElementById("driverId").value;
-    const jobsList = document.getElementById("driverJobsList");
+// WEEK FILTER (FIXED VERSION)
+async function loadMyJobsByWeek() {
+    const selectedDate = document.getElementById("weekStart").value;
+    const selectedStatus = document.getElementById("statusFilter").value;
 
-    jobsList.innerHTML = "";
-
-    if (!driverId) {
-        jobsList.innerHTML = "<p class='error'>Please select a driver</p>";
+    if (!selectedDate) {
+        alert("Please select a date");
         return;
     }
 
     try {
-        const response = await fetch(`http://localhost:8080/jobs/driver/${driverId}`, {
+        const username = localStorage.getItem("username");
+
+        const res = await fetch("http://localhost:8080/drivers", {
             headers: getAuthHeader()
         });
 
-        if (!response.ok) {
-            jobsList.innerHTML = "<p class='error'>Could not load jobs</p>";
-            return;
-        }
+        const drivers = await res.json();
+        const driver = drivers.find(d => d.username === username);
+
+        if (!driver) return;
+
+        const response = await fetch(`http://localhost:8080/jobs/driver/${driver.id}`, {
+            headers: getAuthHeader()
+        });
 
         const jobs = await response.json();
 
-        if (jobs.length === 0) {
-            jobsList.innerHTML = "<p>No jobs assigned</p>";
-            return;
-        }
+        const start = new Date(selectedDate);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
 
-        jobs.forEach(job => {
-            const jobDiv = document.createElement("div");
-            jobDiv.className = "job-card";
+        const filtered = jobs.filter(job => {
+            if (!job.jobDate) return false;
 
-            jobDiv.innerHTML = `
-                <p><strong>Job ID:</strong> ${job.id}</p>
-                <p><strong>Route:</strong> ${job.pickupLocation} → ${job.deliveryLocation}</p>
-                <p><strong>Date:</strong> ${job.jobDate || "N/A"}</p>
-                <p><strong>Weight:</strong> ${job.weight || "N/A"} kg</p>
-                <p><strong>Truck:</strong> ${job.truckType || "N/A"}</p>
-<p>
-    <strong>Status:</strong>
-    <span class="status-badge ${job.status === "COMPLETED" ? "completed" : "pending"}">
-        ${job.status}
-    </span>
-</p>
+            const jobDate = new Date(job.jobDate);
 
-<span class="comments"><strong>Comments:</strong> ${job.comments || "-"}</span>
+            const inWeek = jobDate >= start && jobDate <= end;
+            const statusMatch = selectedStatus === "" || job.status === selectedStatus;
 
-                <textarea class="comment-box" id="comment-${job.id}" placeholder="Add comment"></textarea>
-                <button onclick="addComment(${job.id})">Save Comment</button>
-                <button onclick="markCompleted(${job.id})">Mark Completed</button>
-            `;
-
-            jobsList.appendChild(jobDiv);
+            return inWeek && statusMatch;
         });
 
+        renderJobs(filtered);
+
     } catch (error) {
-        jobsList.innerHTML = "<p class='error'>Error loading jobs</p>";
+        console.error(error);
     }
 }
 
+// Mark job completed
 async function markCompleted(jobId) {
     try {
-        const response = await fetch(`http://localhost:8080/jobs/${jobId}/status?status=COMPLETED`, {
-            method: "PUT",
-            headers: getAuthHeader()
-        });
+        const response = await fetch(
+            `http://localhost:8080/jobs/${jobId}/status?status=COMPLETED`,
+            {
+                method: "PUT",
+                headers: getAuthHeader()
+            }
+        );
 
         if (response.ok) {
-            loadDriverJobs();
+            loadMyJobs();
         } else {
             alert("Failed to update job");
         }
@@ -109,17 +228,66 @@ async function markCompleted(jobId) {
     }
 }
 
+//Add comment
 async function addComment(jobId) {
     const comment = document.getElementById(`comment-${jobId}`).value;
 
-    await fetch(`http://localhost:8080/jobs/${jobId}/comment`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeader()
-        },
-        body: JSON.stringify({ comment })
-    });
+    try {
+        await fetch(`http://localhost:8080/jobs/${jobId}/comment`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({ comment })
+        });
 
-    loadDriverJobs();
+        loadMyJobs();
+
+    } catch (error) {
+        alert("Error saving comment");
+    }
+}
+
+// Logout
+function logout() {
+    localStorage.removeItem("auth");
+    localStorage.removeItem("username");
+}
+
+async function setDriverName() {
+    const username = localStorage.getItem("username");
+    const el = document.getElementById("driverName");
+
+    try {
+        const res = await fetch("http://localhost:8080/drivers", {
+            headers: getAuthHeader()
+        });
+
+        const drivers = await res.json();
+
+        const driver = drivers.find(d => d.username === username);
+
+        if (driver) {
+            el.innerText = driver.name;
+        } else {
+            el.innerText = username; // fallback
+        }
+
+    } catch (error) {
+        console.error(error);
+        el.innerText = username;
+    }
+}
+
+function logout() {
+    localStorage.removeItem("auth");
+    localStorage.removeItem("username");
+
+    window.location.href = "/login.html";
+}
+
+function viewJob(jobId) {
+    window.location.href =
+        `/job.html?id=${jobId}&mode=driver`;
 }

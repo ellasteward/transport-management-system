@@ -2,6 +2,7 @@ package com.ella.truckingapp.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -14,12 +15,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/**").permitAll() // allow creating users
-                        .requestMatchers("/drivers/**").hasRole("ADMIN")
-                        .requestMatchers("/jobs/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/drivers/**").authenticated()
+                        .requestMatchers("/jobs/**").authenticated()
+                        .anyRequest().permitAll()
                 )
-                .httpBasic(org.springframework.security.config.Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
 }
