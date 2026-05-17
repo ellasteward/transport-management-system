@@ -48,61 +48,64 @@ function filterDrivers() {
 }
 
 // CREATE JOB
-document.getElementById("jobForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+async function createJob() {
 
-    const jobId = localStorage.getItem("editJobId");
+    const pickupLocation =
+        document.getElementById("pickupLocation").value;
 
-    const jobData = {
-        pickupLocation: document.getElementById("pickupLocation").value,
-        deliveryLocation: document.getElementById("deliveryLocation").value,
-        jobDate: document.getElementById("jobDate").value,
-        weight: document.getElementById("weight").value,
-        truckType: document.getElementById("truckType").value,
-        comments: document.getElementById("comments").value
+    const deliveryLocation =
+        document.getElementById("deliveryLocation").value;
+
+    const jobDate =
+        document.getElementById("jobDate").value;
+
+    const weight =
+        document.getElementById("weight").value;
+
+    const truckType =
+        document.getElementById("truckType").value;
+
+    const comments =
+        document.getElementById("comments").value;
+
+    const driverId =
+        document.getElementById("driverId").value;
+
+    const body = {
+        pickupLocation,
+        deliveryLocation,
+        jobDate,
+        weight,
+        truckType,
+        comments
     };
 
-    if (jobId) {
-        // UPDATE EXISTING JOB
-        await fetch(`http://localhost:8080/jobs/${jobId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                ...getAuthHeader()
-            },
-            body: JSON.stringify(jobData)
-        });
+    const res = await fetch("http://localhost:8080/jobs", {
 
-        localStorage.removeItem("editJobId");
+        method: "POST",
 
-        alert("Job updated!");
-        document.querySelector("#jobForm button").innerText = "Create Job";
+        headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeader()
+        },
 
-    } else {
-        // CREATE NEW JOB
-        const res = await fetch("http://localhost:8080/jobs", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...getAuthHeader()
-            },
-            body: JSON.stringify(jobData)
-        });
+        body: JSON.stringify(body)
+    });
 
-        const job = await res.json();
+    const job = await res.json();
 
-        const driverId = document.getElementById("driverId").value;
-
-        await fetch(`http://localhost:8080/jobs/${job.id}/assign/${driverId}`, {
+    await fetch(
+        `http://localhost:8080/jobs/${job.id}/assign/${driverId}`,
+        {
             method: "PUT",
             headers: getAuthHeader()
-        });
+        }
+    );
 
-        alert("Job created!");
-    }
+    alert("Job created!");
 
     loadJobs();
-});
+}
 
 // LOAD JOBS
 async function loadJobs() {

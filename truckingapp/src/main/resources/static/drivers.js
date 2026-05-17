@@ -11,7 +11,12 @@ function getAuthHeader() {
 // LOAD DRIVERS
 async function loadDrivers() {
     try {
-        const list = document.getElementById("driverList");
+
+        const driversContainer =
+            document.getElementById("driversList");
+
+        const dispatchersContainer =
+            document.getElementById("dispatchersList");
 
         const res = await fetch("http://localhost:8080/drivers", {
             headers: getAuthHeader()
@@ -19,29 +24,55 @@ async function loadDrivers() {
 
         allDrivers = await res.json();
 
-        list.innerHTML = "";
+        console.log(allDrivers);
+
+        driversContainer.innerHTML = "";
+        dispatchersContainer.innerHTML = "";
 
         allDrivers.forEach(d => {
-            list.innerHTML += `
-                <div class="job-card">
-                    <div class="info">
-                        <p><strong>ID:</strong> ${d.id}</p>
-                        <p><strong>Name:</strong> ${d.name}</p>
-                        <p><strong>Phone:</strong> ${d.phone}</p>
-                        <p><strong>License:</strong> ${d.licenseNumber}</p>
-                        <p><strong>Truck:</strong> ${d.truckType}</p>
-                    </div>
 
-                    <div class="actions">
-                        <button onclick="editDriver(${d.id})">Edit</button>
-                        <button onclick="deleteDriver(${d.id})">Delete</button>
-                    </div>
+            const card = document.createElement("div");
+
+            card.className = "job-card";
+
+            card.innerHTML = `
+                <div class="info">
+                    <p><strong>ID:</strong> ${d.id}</p>
+                    <p><strong>Name:</strong> ${d.name}</p>
+                    <p><strong>Phone:</strong> ${d.phone}</p>
+                    <p><strong>License:</strong> ${d.licenseNumber || "-"}</p>
+${d.role === "DRIVER"
+    ? `<p><strong>Truck:</strong> ${d.truckType || "-"}</p>`
+    : ""
+}                    <p><strong>Role:</strong> ${d.role}</p>
+                </div>
+
+                <div class="actions">
+                    <button onclick="editDriver(${d.id})">
+                        Edit
+                    </button>
+
+                    <button onclick="deleteDriver(${d.id})">
+                        Delete
+                    </button>
                 </div>
             `;
+
+            if (d.role === "DISPATCHER") {
+
+                dispatchersContainer.appendChild(card);
+
+            } else {
+
+                driversContainer.appendChild(card);
+            }
+
         });
 
     } catch (err) {
+
         console.error("Error loading drivers:", err);
+
     }
 }
 
@@ -158,3 +189,4 @@ document.getElementById("userRole").addEventListener("change", function () {
         truckSection.style.display = "block";
     }
 });
+

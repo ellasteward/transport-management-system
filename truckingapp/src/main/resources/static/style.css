@@ -654,4 +654,15 @@ input[type="date"] {
     margin-top: 12px;
 }
 
+.users-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 40px;
+    align-items: start;
+}
+
+.users-grid h2 {
+    margin-bottom: 20px;
+}
 

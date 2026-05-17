@@ -15,7 +15,7 @@ public class Driver {
     private String truckType;
     private String username;
     private String password;
-    private String role;
+    private String role = "DRIVER";
 
     public Driver() {}
 
