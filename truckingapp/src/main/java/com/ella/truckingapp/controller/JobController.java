@@ -3,6 +3,8 @@ package com.ella.truckingapp.controller;
 import com.ella.truckingapp.model.*;
 import com.ella.truckingapp.repository.*;
 import com.ella.truckingapp.model.JobStatus;
+import jakarta.validation.Valid;
+
 
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,7 @@ public class JobController {
     }
 
     @PostMapping
-    public Job createJob(@RequestBody Job job) {
+    public Job createJob(@Valid @RequestBody Job job) {
 
         // SET DEFAULT STATUS
         job.setStatus(JobStatus.PENDING);

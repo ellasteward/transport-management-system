@@ -47,14 +47,13 @@ function filterDrivers() {
     filterDriversByTruck();
 }
 
-// CREATE JOB
 async function createJob() {
 
     const pickupLocation =
-        document.getElementById("pickupLocation").value;
+        document.getElementById("pickupLocation").value.trim();
 
     const deliveryLocation =
-        document.getElementById("deliveryLocation").value;
+        document.getElementById("deliveryLocation").value.trim();
 
     const jobDate =
         document.getElementById("jobDate").value;
@@ -71,6 +70,20 @@ async function createJob() {
     const driverId =
         document.getElementById("driverId").value;
 
+    // FRONTEND VALIDATION
+    if (
+        !pickupLocation ||
+        !deliveryLocation ||
+        !jobDate ||
+        !weight ||
+        !truckType ||
+        !driverId
+    ) {
+document.getElementById("errorMessage").innerText =
+    "Please complete all required fields";
+            return;
+    }
+
     const body = {
         pickupLocation,
         deliveryLocation,
@@ -80,17 +93,23 @@ async function createJob() {
         comments
     };
 
-    const res = await fetch("http://localhost:8080/jobs", {
+    const res = await fetch(
+        "http://localhost:8080/jobs",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(body)
+        }
+    );
 
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeader()
-        },
-
-        body: JSON.stringify(body)
-    });
+    // STOP IF BACKEND FAILED
+    if (!res.ok) {
+        alert("Failed to create job");
+        return;
+    }
 
     const job = await res.json();
 

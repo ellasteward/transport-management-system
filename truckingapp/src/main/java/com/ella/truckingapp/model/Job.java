@@ -1,7 +1,8 @@
 package com.ella.truckingapp.model;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Job {
@@ -10,9 +11,11 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Pickup location required")
     private String pickupLocation;
-    private String deliveryLocation;
 
+    @NotBlank(message = "Delivery location required")
+    private String deliveryLocation;
 
     @Enumerated(EnumType.STRING)
     private JobStatus status;
@@ -20,9 +23,16 @@ public class Job {
     @ManyToOne
     @JoinColumn(name = "driver_id")
     private Driver driver;
-    private String jobDate;     // simple string (easiest)
+
+    @NotBlank(message = "Job date required")
+    private String jobDate;
+
+    @NotBlank(message = "Truck type required")
     private String truckType;
+
+    @NotNull(message = "Weight required")
     private Double weight;
+
     private String comments;
 
     public Job() {}
