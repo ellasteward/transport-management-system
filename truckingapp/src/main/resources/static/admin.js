@@ -408,3 +408,12 @@ function viewJob(jobId) {
     window.location.href =
         `/job.html?id=${jobId}&mode=admin`;
 }
+
+
+function logout() {
+
+    localStorage.removeItem("auth");
+    localStorage.removeItem("username");
+
+    window.location.href = "/login.html";
+}
