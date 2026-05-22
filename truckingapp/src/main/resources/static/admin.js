@@ -8,6 +8,7 @@ let allDrivers = [];
 
 // LOAD PAGE
 document.addEventListener("DOMContentLoaded", () => {
+
     loadDrivers();
     loadJobs();
     loadDriverFilters();
@@ -15,6 +16,24 @@ document.addEventListener("DOMContentLoaded", () => {
     document
         .getElementById("truckType")
         .addEventListener("change", filterDriversByTruck);
+
+    // hide driver management for dispatchers
+    const username =
+        localStorage.getItem("username");
+
+    if (
+        username &&
+        username.toLowerCase().includes("dispatch")
+    ) {
+
+        const link =
+            document.getElementById("manageDriversLink");
+
+        if (link) {
+            link.style.display = "none";
+        }
+    }
+
 });
 
 // LOAD DRIVERS
