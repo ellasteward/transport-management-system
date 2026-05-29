@@ -6,6 +6,48 @@ The system allows administrators and dispatchers to manage transport jobs, assig
 
 ---
 
+## Installation
+
+### Prerequisites
+
+- Java 21 (or your version)
+- MySQL
+- IntelliJ IDEA
+
+### Database Setup
+
+1. Create a MySQL database called:
+
+tms
+
+2. Update application.properties:
+
+spring.datasource.url=jdbc:mysql://localhost:3306/tms
+spring.datasource.username=root
+spring.datasource.password=yourpassword
+
+### Running the Backend
+
+1. Open the project in IntelliJ IDEA
+2. Run the Spring Boot application
+3. Verify the backend starts on:
+
+http://localhost:8080
+
+### Running the Frontend
+
+1. Navigate to:
+
+src/main/resources/static
+
+2. Open login.html in a web browser
+
+### Default Login
+
+Admin:
+Username: admin
+Password: admin123
+
 ## Features
 
 ### Administrator / Dispatcher Features
